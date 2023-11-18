@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node-terminal",
+            "name": "test",
+            "request": "launch",
+            "command": "npm test"
+        },
+        {
+            "type": "node",
+            "name": "test:inspect-brk",
+            "request": "attach",
+            "port": 9230
+        }
+    ]
+}

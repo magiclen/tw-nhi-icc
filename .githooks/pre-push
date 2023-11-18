@@ -1,0 +1,11 @@
+#!/bin/bash
+	 
+npm run build
+if ! git diff --exit-code -- lib; then
+    git add lib && git commit --no-verify -m "generate lib files"
+fi
+	 
+npm run build:webpack
+if ! git diff --exit-code -- dist; then
+    git add dist && git commit --no-verify -m "generate dist files"
+fi

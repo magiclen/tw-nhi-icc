@@ -1,0 +1,67 @@
+{
+    "name": "tw-nhi-icc",
+    "version": "0.1.0",
+    "description": "Read Taiwan NHI cards in JavaScript/TypeScript. 在 JavaScript/TypeScript 中，讀取中華民國健保卡。",
+    "private": true,
+    "type": "module",
+    "exports": "./lib/lib.js",
+    "types": "./lib/lib.d.ts",
+    "files": [
+        "lib"
+    ],
+    "engines": {
+        "node": ">=16"
+    },
+    "scripts": {
+        "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testTimeout 30000",
+        "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testTimeout 30000 --coverage",
+        "test:inspect-brk": "node --experimental-vm-modules --inspect-brk=0.0.0.0:9230 node_modules/jest/bin/jest.js --testTimeout 0 --runInBand",
+        "clean": "rimraf lib",
+        "build": "npm run clean && tsc -p tsconfig.build.json",
+        "build:webpack": "webpack --mode production",
+        "build:watch": "npm run build -- -w",
+        "lint": "eslint src tests",
+        "lint:fix": "npm run lint -- --fix",
+        "prepare": "git config core.hooksPath .githooks || exit 0",
+        "prepack": "npm run build",
+        "prepublishOnly": "npm run lint && npm run test"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/magiclen/tw-nhi-icc.git"
+    },
+    "keywords": [
+        "smart-card",
+        "nhi-card",
+        "ic-card",
+        "taiwan"
+    ],
+    "author": "Magic Len",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/magiclen/tw-nhi-icc/issues"
+    },
+    "homepage": "https://magiclen.org/tw-nhi-icc/",
+    "devDependencies": {
+        "@babel/core": "^7.23.3",
+        "@babel/preset-env": "^7.23.3",
+        "@babel/preset-typescript": "^7.23.3",
+        "@babel/register": "^7.22.15",
+        "@types/jest": "^29.5.8",
+        "@types/ws": "^8.5.9",
+        "@typescript-eslint/eslint-plugin": "^6.11.0",
+        "@typescript-eslint/parser": "^6.11.0",
+        "babel-loader": "^9.1.3",
+        "eslint": "^8.53.0",
+        "eslint-import-resolver-typescript": "^3.6.1",
+        "eslint-plugin-import": "^2.29.0",
+        "jest": "^29.7.0",
+        "rimraf": "^5.0.5",
+        "terser-webpack-plugin": "^5.3.9",
+        "ts-jest": "^29.1.1",
+        "typescript": "^5.2.2",
+        "webpack": "^5.89.0",
+        "webpack-cli": "^5.1.4",
+        "ws": "^8.14.2"
+    }
+}

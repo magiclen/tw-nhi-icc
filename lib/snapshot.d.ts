@@ -41,7 +41,10 @@ export interface NHICard {
  *   - `"empty"`：沒有插卡。
  *   - `"nhi_card"`：讀到健保卡，資料在 `card`。
  *   - `"unsupported_card"`：有卡片，但不是健保卡（例如 SAM 卡或晶片金融卡）。
- *   - `"error"`：讀卡失敗，PC/SC 的錯誤名稱在 `error`。例如 `SharingViolation` 代表卡片正被其它程式獨占使用，服務會自動重試。
+ *   - `"error"`：讀卡失敗，PC/SC 的錯誤名稱在 `error`，例如：
+ *
+ *       - `SharingViolation`：卡片正被其它程式獨占使用，服務會自動重試。
+ *       - `ReaderUnavailable`：讀卡機目前無法使用，恢復後狀態會自動更新。
  * - `card`：健保卡的基本資料。只有 `state` 為 `"nhi_card"` 時才有值，否則為 `null`。
  * - `error`：PC/SC 的錯誤名稱。只有 `state` 為 `"error"` 時才有值，否則為 `null`。
  */

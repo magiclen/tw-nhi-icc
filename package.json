@@ -1,6 +1,6 @@
 {
     "name": "tw-nhi-icc",
-    "version": "0.1.1",
+    "version": "0.2.0",
     "private": true,
     "description": "Read Taiwan NHI cards in JavaScript/TypeScript. 在 JavaScript/TypeScript 中，讀取中華民國健保卡。",
     "keywords": [

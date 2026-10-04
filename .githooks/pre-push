@@ -1,11 +1,13 @@
-#!/bin/bash
-	 
+#!/bin/sh
+
+set -eu
+
 npm run build
-if ! git diff --exit-code -- lib; then
-    git add lib && git commit --no-verify -m "generate lib files"
-fi
-	 
-npm run build:webpack
-if ! git diff --exit-code -- dist; then
-    git add dist && git commit --no-verify -m "generate dist files"
+
+if [ -n "$(git status --porcelain lib dist)" ]; then
+    git add -- lib dist
+    git commit --only --no-verify -m "generate lib and dist files" -- lib dist
+
+    echo "Generated and committed lib and dist files. Run git push again to push the new commit."
+    exit 1
 fi

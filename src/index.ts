@@ -1,19 +1,16 @@
-import { NetworkError, TimeoutError } from "./errors.js";
-import { sleep } from "./sleep.js";
+// 舊版程式碼不符合新的 oxlint 規則，下一個 commit 會整個改寫，暫時停用。
+/* oxlint-disable */
+
+import { NetworkError, TimeoutError } from "./errors.ts";
+import { sleep } from "./sleep.ts";
 
 const RETRY_INTERVAL = 1000;
 
-/**
- * 性別。
- */
+/** 性別。 */
 export const enum Sex {
-    /**
-     * 男。
-     */
+    /** 男。 */
     M = "M",
-    /**
-     * 女。
-     */
+    /** 女。 */
     F = "F",
 }
 
@@ -29,57 +26,41 @@ interface ServiceNHICard {
     issue_date_timestamp: number;
 }
 
-/**
- * 健保卡。
- */
+/** 健保卡。 */
 export interface NHICard {
-    /**
-     * 讀卡機名稱。
-     */
+    /** 讀卡機名稱。 */
     readerName: string;
-    /**
-     * 卡號。
-     */
+    /** 卡號。 */
     cardNo: string;
-    /**
-     * 全名。
-     */
+    /** 全名。 */
     fullName: string;
-    /**
-     * 身份證字號。
-     */
+    /** 身份證字號。 */
     idNo: string;
-    /**
-     * 生日。
-     */
+    /** 生日。 */
     birthday: Date;
-    /**
-     * 性別。
-     */
+    /** 性別。 */
     sex: Sex;
-    /**
-     * 發證日期。
-     */
+    /** 發證日期。 */
     issueDate: Date;
 }
 
-/**
- * TW NHI IC Card Service 的版本資訊。
- */
+/** TW NHI IC Card Service 的版本資訊。 */
 export interface Version {
-    "major": number,
-    "minor": number,
-    "patch": number,
-    "pre": string,
-    "text": string,
+    major: number;
+    minor: number;
+    patch: number;
+    pre: string;
+    text: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
 export type WebSocketRetry = (() => boolean | void | Promise<boolean | void>) | null;
 
 export type WebSocketUpdate = ((cards: NHICard[]) => void | Promise<void>) | null;
 
-const fetchWithTimeout = async <T = unknown>(url: URL, config: RequestInit & { timeout?: number } = {}): Promise<T> => {
+const fetchWithTimeout = async <T = unknown>(
+    url: URL,
+    config: RequestInit & { timeout?: number } = {},
+): Promise<T> => {
     if (!config.signal && typeof config.timeout !== "undefined" && config.timeout >= 0) {
         config.signal = AbortSignal.timeout(config.timeout);
     }
@@ -107,10 +88,12 @@ const fetchWithTimeout = async <T = unknown>(url: URL, config: RequestInit & { t
 
     try {
         if (response.status === 200) {
-            return await response.json() as T;
+            return (await response.json()) as T;
         } else {
             skipCatch = true;
-            throw new Error(`status code = ${response.status}, body = ${JSON.stringify(await response.text())}`);
+            throw new Error(
+                `status code = ${response.status}, body = ${JSON.stringify(await response.text())}`,
+            );
         }
     } catch (error) {
         if (skipCatch) {
@@ -140,9 +123,7 @@ const mapCardList = (cards: ServiceNHICard[]): NHICard[] => {
 };
 
 export class TWNHIICCService {
-    /**
-     * TW NHI IC Card Service 的網址前綴。
-     */
+    /** TW NHI IC Card Service 的網址前綴。 */
     readonly urlPrefix: URL;
 
     private readonly apiGetCardList: URL;
@@ -152,14 +133,10 @@ export class TWNHIICCService {
     private webSocket: InstanceType<typeof WebSocket> | null = null;
     private webSocketInterval: number | undefined;
 
-    /**
-     * 服務嘗試重新連線時要呼叫的函數。當這個函數回傳 `false` 時，則不繼續嘗試重新連線。
-     */
+    /** 服務嘗試重新連線時要呼叫的函數。當這個函數回傳 `false` 時，則不繼續嘗試重新連線。 */
     onWebSocketRetry: WebSocketRetry = null;
 
-    /**
-     * 伺服器取得健保卡清單時要呼叫的函數。
-     */
+    /** 伺服器取得健保卡清單時要呼叫的函數。 */
     onWebSocketUpdate: WebSocketUpdate = null;
 
     /**
@@ -189,7 +166,6 @@ export class TWNHIICCService {
      * 取得 TW NHI IC Card Service 的版本資訊。
      *
      * @param timeout 逾時時間（毫秒）。預設值： `5000`
-     *
      * @throws {NetworkError}
      * @throws {TimeoutError}
      */
@@ -201,12 +177,13 @@ export class TWNHIICCService {
      * 取得健保卡清單。
      *
      * @param timeout 逾時時間（毫秒）。預設值： `15000`
-     *
      * @throws {NetworkError}
      * @throws {TimeoutError}
      */
     public async getCardList(timeout = 15000): Promise<NHICard[]> {
-        const cards = await fetchWithTimeout<ServiceNHICard[]>(this.apiGetCardList, { timeout: timeout });
+        const cards = await fetchWithTimeout<ServiceNHICard[]>(this.apiGetCardList, {
+            timeout: timeout,
+        });
 
         return mapCardList(cards);
     }
@@ -215,7 +192,6 @@ export class TWNHIICCService {
      * 開啟 WebSocket。記得不用時要使用 `closeWebSocket` 方法來釋放資源。
      *
      * @param {interval} 設定伺服器回傳所有讀卡機的健保卡中的基本資料的時間間隔（秒）。預設值： `3`
-     *
      * @throws {NetworkError}
      */
     public async openWebSocket(interval: number | undefined = 3): Promise<void> {
@@ -330,7 +306,11 @@ export class TWNHIICCService {
             webSocket.onerror = (event) => {
                 let tryError = (event as unknown as { error?: Error }).error;
 
-                if (typeof tryError !== "undefined" && typeof tryError.name === "string" && typeof tryError.message === "string") {
+                if (
+                    typeof tryError !== "undefined" &&
+                    typeof tryError.name === "string" &&
+                    typeof tryError.message === "string"
+                ) {
                     tryError = new NetworkError(tryError);
 
                     reject(tryError);
@@ -343,16 +323,12 @@ export class TWNHIICCService {
         this.webSocket = await promise;
     }
 
-    /**
-     * WebSocket 是否正在執行。
-     */
+    /** WebSocket 是否正在執行。 */
     public isWebSocketRunning(): boolean {
         return this.webSocket !== null;
     }
 
-    /**
-     * 關閉 WebSocket。
-     */
+    /** 關閉 WebSocket。 */
     public closeWebSocket() {
         if (this.webSocket) {
             this.webSocket.close(1000);
@@ -376,11 +352,11 @@ export class TWNHIICCService {
             } else {
                 interval = Math.floor(interval);
             }
-    
+
             this.webSocket.send(interval.toString());
-    
+
             this.webSocketInterval = interval;
-    
+
             return true;
         } else {
             this.webSocketInterval = undefined;

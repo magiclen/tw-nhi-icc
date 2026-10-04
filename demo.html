@@ -23,7 +23,7 @@
 
     <body class="p-3 p-lg-5">
         <div class="form-floating">
-            <textarea id="ta" class="form-control" rows="15" readonly></textarea>
+            <textarea id="ta" class="form-control" rows="20" readonly></textarea>
             <label id="tal" for="ta">與 TW NHI IC Card Service 建立連線中……</label>
         </div>
 
@@ -31,37 +31,31 @@
             const tal = document.getElementById("tal");
             const ta = document.getElementById("ta");
 
-            const sleep = (milliseconds) => {
-                return new Promise((resolve) => setTimeout(resolve, milliseconds));
-            };
+            // `Date` 以台灣時區的日期顯示，不然 `JSON.stringify` 會顯示成前一天的 UTC 時間
+            const replacer = function (key, value) {
+                const original = this[key];
 
-            const init = async () => {
-                const service = new TWNHIICCService();
-
-                for (;;) {
-                    try {
-                        await service.openWebSocket();
-                        break;
-                    } catch (error) {
-                        await sleep(1000);
-
-                        continue;
-                    }
+                if (original instanceof Date) {
+                    return original.toLocaleDateString("zh-TW", { timeZone: "Asia/Taipei" });
                 }
 
-                service.onWebSocketUpdate = (cards) => {
-                    ta.innerHTML = JSON.stringify(cards, null, 4);
-                    tal.innerHTML = "健保卡清單";
-                };
-
-                service.onWebSocketRetry = () => {
-                    ta.innerHTML = "";
-                    tal.innerHTML = "與 TW NHI IC Card Service 重新連線中";
-                };
+                return value;
             };
 
-            init().catch((error) => {
-                console.error(error);
+            const service = new TWNHIICC.TWNHIICCService();
+
+            service.watch({
+                onSnapshot: (snapshot) => {
+                    ta.value = JSON.stringify(snapshot, replacer, 4);
+                },
+                onConnectionChange: (connected) => {
+                    if (connected) {
+                        tal.textContent = "讀卡機狀態";
+                    } else {
+                        ta.value = "";
+                        tal.textContent = "與 TW NHI IC Card Service 重新連線中……";
+                    }
+                },
             });
         </script>
     </body>
